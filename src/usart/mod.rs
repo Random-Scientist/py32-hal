@@ -133,11 +133,17 @@ pub enum ConfigError {
     /// Rx or Tx not enabled
     RxOrTxNotEnabled,
 }
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+/// Address for checked address UART RX.
+/// Only the 4 LSBs are used
+pub struct CheckAddress(u8);
 
 #[non_exhaustive]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 /// Config
 pub struct Config {
+    pub address_check: Option<CheckAddress>,
     /// Baud rate
     pub baudrate: u32,
     /// Number of data bits
@@ -173,6 +179,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            address_check: None,
             baudrate: 115200,
             data_bits: DataBits::DataBits8,
             stop_bits: StopBits::STOP1,
@@ -1370,6 +1377,10 @@ fn configure(
             // StopBits::STOP1P5 => vals::Stop::STOP1P5,
             StopBits::STOP2 => vals::Stop::STOP2,
         });
+        // configure address check
+        if let Some(a) = config.address_check {
+            w.set_add(a);
+        }
     });
 
     r.cr3().modify(|w| {
@@ -1418,6 +1429,10 @@ fn configure(
                 vals::Ps::EVEN
             }
         });
+        // configure address check
+        if config.address_check.is_some() {
+            w.set_wake(vals::Wake::ADDRESSMARK);
+        }
     });
 
     Ok(())
