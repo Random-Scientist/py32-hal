@@ -133,17 +133,13 @@ pub enum ConfigError {
     /// Rx or Tx not enabled
     RxOrTxNotEnabled,
 }
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-/// Address for checked address UART RX.
-/// Only the 4 LSBs are used
-pub struct CheckAddress(u8);
-
 #[non_exhaustive]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 /// Config
 pub struct Config {
-    pub address_check: Option<CheckAddress>,
+    /// Address for checked address UART RX.
+    /// Only the 4 LSBs are used
+    pub address_check: Option<u8>,
     /// Baud rate
     pub baudrate: u32,
     /// Number of data bits
